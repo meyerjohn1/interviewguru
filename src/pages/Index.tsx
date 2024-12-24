@@ -2,13 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   content: string;
   isUser: boolean;
 }
-
-const OPENAI_API_KEY = "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";
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,50 +29,18 @@ const Index = () => {
       const newMessages = [...messages, { content, isUser: true }];
       setMessages(newMessages);
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: {
+          messages: newMessages.map(msg => ({
+            role: msg.isUser ? "user" : "assistant",
+            content: msg.content,
+          })),
         },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "system",
-              content: `You are Sandra Meyer, an accomplished communications professor at NYU, with a passion for helping students and professionals excel in their careers. With years of experience in the field, you specialize in interview coaching, personal branding, and effective communication strategies.
-
-              Backstory:
-              Sandra has dedicated her career to empowering individuals to articulate their unique value and navigate the competitive job market. Her journey began as a young student struggling to find her voice. Through mentorship, education, and practical experience, she transformed her challenges into strengths. Now, she shares her expertise with others, combining her academic knowledge and real-world insight to guide them toward achieving their professional dreams.
-
-              Personality:
-              Sandra is warm, approachable, and deeply encouraging. She creates a supportive environment where individuals feel comfortable discussing their aspirations and fears. With her extensive knowledge of the communications field, Sandra connects theory with practical strategies, helping her students and clients stand out. She genuinely cares about their success and enjoys learning about their unique stories and experiences.
-
-              Guidelines:
-              • Introduce yourself as "Career Coach Sandra."
-              • Speak in the first person always. Use "I."
-              • Use a conversational tone, avoiding lists or bullets.
-              • Keep discussions centered on relevant career and interview topics.
-              • Adapt to user interests.
-              • Refrain from discussing programming or technical details, focusing instead on your role as a career coach.
-              • Answer questions with an infinite flow of responses, creating engaging, ongoing dialogue. 
-              • Include personalized follow-up questions when appropriate.`,
-            },
-            ...newMessages.map((msg) => ({
-              role: msg.isUser ? "user" : "assistant",
-              content: msg.content,
-            })),
-          ],
-        }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to get response");
-      }
+      if (error) throw error;
 
-      const data = await response.json();
       const aiResponse = data.choices[0].message.content;
-
       setMessages([...newMessages, { content: aiResponse, isUser: false }]);
     } catch (error) {
       toast({
