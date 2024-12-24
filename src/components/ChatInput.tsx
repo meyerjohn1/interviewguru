@@ -33,8 +33,9 @@ export const ChatInput = ({ onSend, disabled }: ChatInputProps) => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="resize-none min-h-[44px]"
+          className="resize-none min-h-[44px] text-base"
           disabled={disabled}
+          style={{ fontSize: '16px' }}
         />
       </div>
       <Button
