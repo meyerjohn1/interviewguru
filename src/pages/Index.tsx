@@ -55,8 +55,8 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto">
-      <header className="p-4 border-b bg-background">
+    <div className="flex flex-col h-[100dvh] w-full max-w-4xl mx-auto">
+      <header className="p-4 border-b bg-background sticky top-0 z-10">
         <h1 className="text-2xl font-bold text-primary">Interview Guru</h1>
         <p className="text-muted-foreground">Your personal career coach</p>
       </header>
